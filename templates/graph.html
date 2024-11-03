@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+    <title>Graph - Futuro Hacker</title>
+  </head>
+
+  <body>
+    <div class="chart">
+        <canvas id="myChart" style="width:100%;max-width:700px"></canvas> 
+    </div>
+    <script>
+        const labels = {{labels | tojson }};
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: "Sales",
+                backgroundColor: "rgb(255, 99, 132)",
+                borderColor: "rgb(255, 99, 132)",
+                data: {{ data | tojson}},
+            }]
+        };
+
+        const config = {
+            type: "line",
+            data: data,
+            options: { maintainAspectRatio: false }
+        };
+
+        const myChart = new Chart(
+            document.getElementById("myChart"),
+            config
+        )
+    </script>
+
+    <a href="{{ url_for('dashboard' )}}">
+        <button class="start-button" onclick="">Regresar</button>
+    </a>
+
+  </body>
+</html>

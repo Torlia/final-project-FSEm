@@ -1,0 +1,266 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #69995D;
+  text-align: center;
+  width: 90%;
+  padding: 20px 0;
+  border-radius: 15px;
+  margin: 30px auto 40px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+}
+
+.objective, .rules {
+  text-align: center;
+  font-size: 1rem;
+  color: black;
+  margin: 20px auto;
+  width: 90%;
+}
+
+.start-button-div {
+  padding: 20px;
+}
+
+.start-button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 4px;
+  border-style: solid;
+  border: #E31E5C;
+  font-size: x-large;
+  font-weight: bold;
+  background-color: #E31E5C;
+  color: white;
+  padding: 12px 20px 12px;
+  margin-bottom: 20px;
+}
+
+.start-button:hover {
+  border: #69995D;
+  background-color: #69995D;
+}
+
+.chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 3%;
+  padding-bottom: 40px;
+}
+
+.tarjeta-funcionalidad {
+  background: linear-gradient(45deg, #0096c7 10%, #0077b6 80%);
+  border-radius: 10px;
+  padding: 3%;
+  color: white;
+  display: flex;
+  align-items: center;
+  width: 70%;
+  margin: 30px auto 40px;
+  flex-direction: column;
+  text-align: center;
+}
+
+.tarjeta-titulo h2 {
+  margin: 0;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.toggle {
+  align-items: center;
+  margin-top: 15px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #ECA72C;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #ECA72C;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.slider-contenedor {
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.sliderMain {
+  align-items: center;
+  margin-top: 15px;
+  -webkit-appearance: none;
+  appearance: none; 
+  width: 300px; 
+  height: 25px; 
+  background: #ECA72C ; 
+  outline: none;
+  border-radius: 12px;
+}
+
+.temperatura-container {
+  padding: 5px;
+  color: white;
+  width: 100%;
+}
+
+#current-temp {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+
+.centered-container {
+  display: table;
+  margin: 0 auto;
+  border-spacing: 40px;
+}
+
+#radiadorTarjeta, #ventiladorTarjeta {
+  display: table-cell;
+  width: 50%;
+  padding: 15px;
+  vertical-align: middle;
+  background-color: #007bb5;
+  border-radius: 10px;
+}
+
+#radiadorTarjeta .slider-contenedor,
+#ventiladorTarjeta .slider-contenedor {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sliderMain {
+  width: 300px;
+  height: 25px;
+  background: #ECA72C;
+  outline: none;
+  border-radius: 12px;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  .tarjeta-funcionalidad {
+      width: 90%;
+      padding: 6%;
+  }
+
+  header {
+      width: 95%;
+      padding: 15px 0;
+      font-size: 1.2rem;
+  }
+
+  .start-button {
+      font-size: medium;
+      padding: 8px 12px;
+  }
+
+  .footer-content h2 {
+      font-size: 1rem;
+  }
+
+  .sliderMain {
+      width: 200px;
+      height: 15px;
+  }
+
+  #current-temp {
+      font-size: 1.5em;
+  }
+
+  .footer-social .twitter-icon img {
+      width: 20px;
+      height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tarjeta-funcionalidad {
+      width: 95%;
+      padding: 8%;
+  }
+
+  header {
+      font-size: 1rem;
+      padding: 10px 0;
+  }
+
+  .start-button {
+      font-size: small;
+      padding: 6px 10px;
+  }
+
+  #temp-limits input {
+      width: 60px;
+  }
+
+  .sliderMain {
+      width: 150px;
+  }
+
+  #current-temp {
+      font-size: 1.2em;
+  }
+}
