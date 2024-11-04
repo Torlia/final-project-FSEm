@@ -76,6 +76,20 @@ function actualizarTemperatura() {
     });
 }
 
-function potencia(slider, spanID) {
-    document.getElementById(spanID).innerText = slider.value + "%";
+function potencia(slider, spanID, dispositivo) {
+    const valorPotencia = slider.value;
+    document.getElementById(spanID).innerText = valorPotencia + "%";
+
+    fetch('/actualizar-potencia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispositivo, valorPotencia })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(`Potencia actualizada: ${data.message}`);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }

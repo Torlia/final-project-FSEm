@@ -60,7 +60,7 @@
               <h2>Control de potencia del radiador</h2>
           </div>
           <div class="slider-contenedor">
-              <input class="sliderMain" type="range" min="0" max="100" value="50" id="radiadorSlider" oninput="potencia(this, 'porcentajeRadiador')">
+              <input class="sliderMain" type="range" min="0" max="100" value="50" id="radiadorSlider" oninput="potencia(this, 'porcentajeRadiador', 'radiador')">
               <span id="porcentajeRadiador">50%</span>
           </div>
       </div>
@@ -71,12 +71,12 @@
           </div>
           <p style="margin-bottom: 1px;">Ventilador 1:</p>
           <div class="slider-contenedor">
-              <input class="sliderMain" type="range" min="0" max="100" value="50" id="ventiladorSlider" oninput="potencia(this, 'porcentajeVentilador')">
-              <span id="porcentajeVentilador">50%</span>
+              <input class="sliderMain" type="range" min="0" max="100" value="50" id="ventiladorSlider" oninput="potencia(this, 'porcentajeVentilador1', 'ventilador1')">
+              <span id="porcentajeVentilador1">50%</span>
           </div>
           <P style="margin-bottom: 1px;">Ventilador 2:</P>
           <div class="slider-contenedor">
-            <input class="sliderMain" type="range" min="0" max="100" value="0" id="ventiladorSlider2" oninput="potencia(this, 'porcentajeVentilador2')">
+            <input class="sliderMain" type="range" min="0" max="100" value="0" id="ventiladorSlider2" oninput="potencia(this, 'porcentajeVentilador2', 'ventilador2')">
             <span id="porcentajeVentilador2">0%</span>
         </div>
       </div>

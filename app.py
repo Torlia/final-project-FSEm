@@ -7,6 +7,12 @@ from flask import Flask, send_from_directory, render_template, request, jsonify
 
 app = Flask(__name__)
 
+dispositivos = {
+    'radiador': 0x01,
+    'ventilador1': 0x02,
+    'ventilador2': 0x03
+}
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
@@ -19,7 +25,7 @@ def control_irrigacion():
         #estado_value = 1 if estado == 'on' else 0
         #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [estado_value])
         #i2c.i2c_rdwr(msg)
-        print(f"Irrigación {estado}")
+        print(f"Enviando a Pico: Irrigación {estado}")
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
@@ -64,6 +70,26 @@ def actualizar_temperatura():
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
+
+@app.route("/actualizar-potencia", methods=["POST"])
+def actualizar_potencia():
+    data = request.get_json()
+    dispositivo = data.get('dispositivo')
+    valor_potencia = int(data.get('valorPotencia'))
+
+    if dispositivo not in dispositivos:
+        return jsonify({"error": "Dispositivo no válido."}), 400
+
+    try:
+        identificador = dispositivos[dispositivo]
+        # msg = smbus2.i2c_msg.write(SLAVE_ADDR, [identificador, valor_potencia])
+        # i2c.i2c_rdwr(msg)
+        print(f"Enviando a Pico: Dispositivo {dispositivo} (ID: {identificador}), Potencia {valor_potencia}")
+    except Exception as e:
+        print(f"Error enviando datos a Pico: {e}")
+        return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
+
+    return jsonify({"message": f"Potencia de {dispositivo} actualizada a {valor_potencia}%"})
 
 @app.route("/graph")
 def graph():
