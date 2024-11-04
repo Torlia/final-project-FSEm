@@ -93,3 +93,148 @@ function potencia(slider, spanID, dispositivo) {
         console.error('Error:', error);
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/historico-datos')
+        .then(response => response.json())
+        .then(datos => {
+            const ctxTemp = document.getElementById('graficaTemperatura').getContext('2d');
+            new Chart(ctxTemp, {
+                type: 'line',
+                data: {
+                    labels: datos.temperaturas.map(item => item.hora),
+                    datasets: [
+                        {
+                            label: 'Temperatura Mínima (°C)',
+                            data: datos.temperaturas.map(item => item.minTemp),
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Temperatura Máxima (°C)',
+                            data: datos.temperaturas.map(item => item.maxTemp),
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'white'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+                
+            });
+
+            const ctxIrrigacion = document.getElementById('graficaIrrigacion').getContext('2d');
+            new Chart(ctxIrrigacion, {
+                type: 'bar',
+                data: {
+                    labels: datos.irrigacion.map(item => item.hora),
+                    datasets: [
+                        {
+                            label: 'Estado de Irrigación (1 = On, 0 = Off)',
+                            data: datos.irrigacion.map(item => item.estado === 'on' ? 1 : 0),
+                            backgroundColor: 'green'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'white'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }                
+            });
+
+            const graph_acciones = document.getElementById('graficaAcciones').getContext('2d');
+            const horas = datos.acciones.map(item => item.hora);
+            const tipos = datos.acciones.map(item => item.tipo);
+            const tiposAcciones = {
+                'irrigacion': 1,
+                'ventilador': 2,
+                'radiador': 3,
+                'temperatura': 4
+            };
+            const accionesData = tipos.map(tipo => tiposAcciones[tipo]);
+
+            new Chart(graph_acciones, {
+                type: 'scatter', 
+                data: {
+                    datasets: [{
+                        label: 'Acciones',
+                        data: horas.map((hora, index) => ({
+                            x: hora,
+                            y: accionesData[index]
+                        })),
+                        backgroundColor: 'yellow'
+                    }]
+                },
+                options: {
+                    scales: {
+                        responsive: true,
+                        x: {
+                            type: 'category',
+                            ticks: {
+                                color: 'white'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            ticks: {
+                                callback: function(value) {
+                                    return Object.keys(tiposAcciones).find(key => tiposAcciones[key] === value);
+                                },
+                                color: 'white'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+
+        });
+    });

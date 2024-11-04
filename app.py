@@ -17,6 +17,10 @@ dispositivos = {
 def dashboard():
     return render_template("dashboard.html")
 
+@app.route("/graph")
+def graph():
+    return render_template("graph.html")
+
 @app.route("/control-irrigacion", methods=["POST"])
 def control_irrigacion():
     data = request.get_json()
@@ -91,12 +95,30 @@ def actualizar_potencia():
 
     return jsonify({"message": f"Potencia de {dispositivo} actualizada a {valor_potencia}%"})
 
-@app.route("/graph")
-def graph():
-    labels = ["January", "February", "March", "April", "May", "June"]
-    data = [0, 10, 15, 8, 22, 18, 25]
-
-    return render_template("graph.html", data=data, labels=labels)
+@app.route("/historico-datos", methods=["GET"])
+def historico_datos():
+    datos_dummy = {
+        "temperaturas": [
+            {"hora": "08:00", "minTemp": 15.2, "maxTemp": 22.5},
+            {"hora": "12:00", "minTemp": 16.0, "maxTemp": 24.0},
+            {"hora": "16:00", "minTemp": 17.5, "maxTemp": 23.5},
+            {"hora": "20:00", "minTemp": 14.5, "maxTemp": 20.5},
+        ],
+        "irrigacion": [
+            {"hora": "09:00", "estado": "on"},
+            {"hora": "14:00", "estado": "off"},
+            {"hora": "18:00", "estado": "on"},
+        ],
+        "acciones": [
+            {"hora": "08:00", "tipo": "irrigacion"},
+            {"hora": "11:00", "tipo": "ventilador"},
+            {"hora": "12:00", "tipo": "radiador"},
+            {"hora": "12:06", "tipo": "ventilador"},
+            {"hora": "12:10", "tipo": "ventilador"},
+            {"hora": "16:00", "tipo": "temperatura"},
+        ]
+    }
+    return jsonify(datos_dummy)
 
 @app.route("/robots.txt")
 def robots_txt():

@@ -6,37 +6,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
-    <title>Graph - Futuro Hacker</title>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <title>Graphs</title>
   </head>
 
   <body>
-    <div class="chart">
-        <canvas id="myChart" style="width:100%;max-width:700px"></canvas> 
+    <div class="tarjeta-funcionalidad">
+        <div class="tarjeta-titulo">
+            <h2>Histórico de Temperatura</h2>
+        </div>
+        <canvas id="graficaTemperatura"></canvas>
     </div>
-    <script>
-        const labels = {{labels | tojson }};
 
-        const data = {
-            labels: labels,
-            datasets: [{
-                label: "Sales",
-                backgroundColor: "rgb(255, 99, 132)",
-                borderColor: "rgb(255, 99, 132)",
-                data: {{ data | tojson}},
-            }]
-        };
+    <div class="tarjeta-funcionalidad">
+        <div class="tarjeta-titulo">
+            <h2>Histórico de Irrigación</h2>
+        </div>
+        <canvas id="graficaIrrigacion"></canvas>
+    </div>
 
-        const config = {
-            type: "line",
-            data: data,
-            options: { maintainAspectRatio: false }
-        };
-
-        const myChart = new Chart(
-            document.getElementById("myChart"),
-            config
-        )
-    </script>
+    <div class="tarjeta-funcionalidad">
+        <div class="tarjeta-titulo">
+            <h2>Histórico de Acciones</h2>
+        </div>
+        <canvas id="graficaAcciones"></canvas>
+    </div>
 
     <a href="{{ url_for('dashboard' )}}">
         <button class="start-button" onclick="">Regresar</button>
