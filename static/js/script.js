@@ -19,57 +19,59 @@ function controlRiego() {
 function programarCiclo(tipo) {
     const horaInicio = document.getElementById(`hora-inicio-${tipo}`).value;
     const duracion = document.getElementById(`duracion-${tipo}`).value;
+    const frecuencia = document.getElementById(`frecuencia-${tipo}`).value;
 
     if (isNaN(duracion) || duracion < 1 || duracion % 1 !== 0) {
         alert("La duración debe ser un número entero mayor a 0.");
+        return;
+    }
+    if (isNaN(frecuencia) || frecuencia < 1 || frecuencia % 1 !== 0) {
+        alert("La frecuencia debe ser un número entero mayor a 0.");
+        return;
+    }
+    if (frecuencia > 7) {
+        alert("La frecuencia no puede ser mayor a 7 días, ya que las plantas requieren agua.");
         return;
     }
 
     fetch('/programar-ciclo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, horaInicio, duracion })
+        body: JSON.stringify({ tipo, horaInicio, duracion, frecuencia})
     })
     .then(response => response.json())
     .then(data => {
         alert(`Ciclo de ${tipo} programado con éxito: ${data.message}`);
+        document.getElementById('ciclo-programado').innerText = 
+            `Ciclo programado a las ${horaInicio} por ${duracion} min, cada ${frecuencia} días`;
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
 
-function actualizarTemperatura() {
-    let minTemp = document.getElementById('min-temp').value;
-    let maxTemp = document.getElementById('max-temp').value;
+function programarCicloTemperatura(tipo) {
+    const horaInicio = document.getElementById('hora-inicio-temperatura').value;
+    const horaFin = document.getElementById('hora-fin-temperatura').value;
 
-    minTemp = parseFloat(parseFloat(minTemp).toFixed(1));
-    maxTemp = parseFloat(parseFloat(maxTemp).toFixed(1));
-
-    if (parseInt(minTemp) >= parseInt(maxTemp)) {
-        alert("La temperatura mínima debe ser menor que la temperatura máxima.");
+    if (!horaInicio || !horaFin) {
+        alert("Se debe de ingresar hora de inicio y de fin del día.");
         return;
     }
-    if (minTemp < -55 || minTemp > 150) {
-        alert("La temperatura mínima debe estar entre -55°C y 150°C.");
-        return;
-    }
-    if (maxTemp < -55 || maxTemp > 150) {
-        alert("La temperatura máxima debe estar entre -55°C y 150°C.");
+    if (horaInicio >= horaFin) {
+        alert("La hora de inicio debe ser antes que la hora de fin.");
         return;
     }
 
-
-    fetch('/actualizar-temperatura', {
+    fetch('/programar-ciclo-temperatura', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ minTemp, maxTemp })
+        body: JSON.stringify({tipo, horaInicio, horaFin })
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('display-min-temp').innerText = `${data.minTemp}°C`;
-        document.getElementById('display-max-temp').innerText = `${data.maxTemp}°C`;
-        alert(`Temperaturas actualizadas: Mínima ${data.minTemp}°C, Máxima ${data.maxTemp}°C`);
+        alert(`Ciclo de ${tipo} programado con éxito: ${data.message}`);
+        document.getElementById('display-ciclo-temperatura').innerText = `Ciclo programado de las ${horaInicio} a las ${horaFin}`;
     })
     .catch(error => {
         console.error('Error:', error);

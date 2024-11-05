@@ -42,35 +42,34 @@ def programar_ciclo():
     tipo = data.get('tipo')
     hora_inicio = data.get('horaInicio')
     duracion = data.get('duracion')
+    frecuencia = data.get('frecuencia')
     try:
         #horas, minutos = map(int, hora_inicio.split(':'))
-        #if horas > 255 or minutos > 255 or duracion > 255:
-        #    raise ValueError("Los valores de hora o duración son demasiado altos.")
-        #data_ent = [horas, minutos, duracion]
+        #if horas > 255 or minutos > 255 or duracion > 255 or frecuencia > 255:
+        #    raise ValueError("Los valores de hora o duración o frecuencia son demasiado altos.")
+        #data_sent = [horas, minutos, duracion, frecuencia]
         #msg = smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
         #i2c.i2c_rdwr(msg)
-        print(f"Enviando a Pico: Hora {hora_inicio}, Duración {duracion} minutos")
+        print(f"Enviando a Pico: Hora {hora_inicio}, Duración {duracion} minutos, Frecuencia {frecuencia} días")
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
 
-    return jsonify({"message": f"Ciclo de {tipo} programado para comenzar a las {hora_inicio} por {duracion} minutos"})
+    return jsonify({"message": f"Ciclo de {tipo} programado para comenzar a las {hora_inicio} por {duracion} minutos cada {frecuencia} días"})
 
-@app.route("/actualizar-temperatura", methods=["POST"])
-def actualizar_temperatura():
+@app.route("/programar-ciclo-temperatura", methods=["POST"])
+def programar_ciclo_temperatura():
     data = request.get_json()
-    min_temp = float(data.get('minTemp'))
-    max_temp = float(data.get('maxTemp'))
-
-    if min_temp >= max_temp:
-        return jsonify({"error": "La temperatura mínima debe ser menor que la máxima."}), 400
+    tipo = data.get('tipo')
+    hora_inicio = data.get('horaInicio')
+    hora_fin = data.get('horaFin')
 
     try:
-        #data_sent = [min_temp, max_temp]
+        #data_sent = [hora_inicio, hora_fin]
         #msg = smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
         #i2c.i2c_rdwr(msg)
-        print(f"Enviando a Pico: Temperatura Mínima {min_temp}, Temperatura Máxima {max_temp}")
-        return jsonify({"minTemp": min_temp, "maxTemp": max_temp})
+        print(f"Enviando a Pico: Hora inicio: {hora_inicio}, Hora fin: {hora_fin}")
+        return jsonify({"message": f"Ciclo de {tipo} programado para comenzar a las {hora_inicio} y terminar a las {hora_fin}"})
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
@@ -119,10 +118,6 @@ def historico_datos():
         ]
     }
     return jsonify(datos_dummy)
-
-@app.route("/robots.txt")
-def robots_txt():
-    return send_from_directory(app.static_folder, "robots.txt")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

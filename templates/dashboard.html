@@ -32,26 +32,28 @@
         </div>
         <form id="programa-irrigacion" style="margin-top:10px;">
             <label for="hora-inicio">Hora de inicio:</label>
-            <input type="time" id="hora-inicio-irrigacion">
+            <input type="time" id="hora-inicio-irrigacion" value="10:00" step="60">
             <label for="duracion">Duración (min):</label>
-            <input type="number" id="duracion-irrigacion" min="1" max="60">
+            <input type="number" id="duracion-irrigacion" min="1" max="60" value="5">
+            <label for="frecuencia"> Frecuencia (días):</label>
+            <input type="number" id="frecuencia-irrigacion" min="1" max="7" value="3">
             <button type="button" onclick="programarCiclo('irrigacion')">Programar</button>
         </form>
+        <p id="ciclo-programado">Ciclo programado a las 10:00 por 5 min, cada 3 días</p>
     </div>
 
     <div class="tarjeta-funcionalidad" style="margin-bottom: 0%;">
         <div class="tarjeta-titulo">
-            <h2>Control de Temperatura</h2>
+            <h2>Programar Ciclo de Temperatura</h2>
         </div>
         <form id="control-temperatura" style="margin-top:10px;">
-            <label for="min-temp">Temperatura Mínima (°C):</label>
-            <input type="number" id="min-temp" min="-55" max="150" step="0.1" value="14">
-            <label for="max-temp">Temperatura Máxima (°C):</label>
-            <input type="number" id="max-temp" min="-55" max="150" step="0.1" value="22">
-            <button type="button" onclick="actualizarTemperatura()">Actualizar</button>
+            <label for="hora-inicio-temperatura">Hora de Inicio:</label>
+            <input type="time" id="hora-inicio-temperatura" value="10:00">
+            <label for="hora-fin-temperatura">Hora de Fin:</label>
+            <input type="time" id="hora-fin-temperatura" value="20:00">
+            <button type="button" onclick="programarCicloTemperatura('temperatura')">Programar</button>
         </form>
-        <p>La temperatura mínima se encuentra establecida en: <span id="display-min-temp">14°C</span></p>
-        <p>La temperatura máxima se encuentra establecida en: <span id="display-max-temp">22°C</span></p>
+        <p id="display-ciclo-temperatura">Ciclo programado de las 10:00 a las 20:00</p>
     </div>    
 
   <div class="centered-container" style="margin-bottom:0%">
