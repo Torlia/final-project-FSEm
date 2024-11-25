@@ -47,6 +47,7 @@
             <h2>Programar Ciclo de Temperatura</h2>
         </div>
         <form id="control-temperatura" style="margin-top:10px;">
+
             <label for="hora-inicio-temperatura">Hora de Inicio:</label>
             <input type="time" id="hora-inicio-temperatura" value="10:00">
             <label for="hora-fin-temperatura">Hora de Fin:</label>
@@ -56,6 +57,22 @@
         <p id="display-ciclo-temperatura">Ciclo programado de las 10:00 a las 20:00</p>
     </div>    
 
+    <div class="tarjeta-funcionalidad">
+        <div class="tarjeta-titulo">
+            <h2>Control de Clima</h2>
+        </div>
+        <p id="display-temperatura-actual">Temperatura actual: 0</p>
+        <div id="temp-limits" style="margin-bottom:0%;">
+            <input type="number" id="min-temp" placeholder="Temperatura mínima" oninput="updateTempLimits()">
+            <input type="number" id="max-temp" placeholder="Temperatura máxima" oninput="updateTempLimits()">
+        </div>
+        <button type="button" onclick="updateTemperature()" style="margin-top: 1%;">Actualizar</button>
+        <div id="temp-messages">
+            <p>La temperatura mínima se encuentra establecida en: <span id="display-min-temp">18</span>°C</p>
+            <p>La temperatura máxima se encuentra establecida en: <span id="display-max-temp">20</span>°C</p>
+        </div>
+    </div>
+    
   <div class="centered-container" style="margin-bottom:0%">
       <div class="tarjeta-funcionalidad" id="radiadorTarjeta">
           <div class="tarjeta-titulo">

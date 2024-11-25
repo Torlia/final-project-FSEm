@@ -50,6 +50,18 @@ function programarCiclo(tipo) {
     });
 }
 
+function verificarCicloPeriodicamente() {
+    setInterval(() => {
+        fetch('/supervisar-ciclo')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.mensaje);
+            })
+            .catch(error => console.error('Error al supervisar el ciclo en ejecución:', error));
+    }, 1000);
+}
+verificarCicloPeriodicamente();
+
 function programarCicloTemperatura(tipo) {
     const horaInicio = document.getElementById('hora-inicio-temperatura').value;
     const horaFin = document.getElementById('hora-fin-temperatura').value;
@@ -77,6 +89,67 @@ function programarCicloTemperatura(tipo) {
         console.error('Error:', error);
     });
 }
+
+function updateTempLimits() {
+    const minTemp = document.getElementById('min-temp').value || 14;
+    const maxTemp = document.getElementById('max-temp').value || 22;
+
+    document.getElementById('display-min-temp').innerText = minTemp;
+    document.getElementById('display-max-temp').innerText = maxTemp;
+}
+
+function updateTemperature() {
+    const minTemp = document.getElementById('min-temp').value || 14;
+    const maxTemp = document.getElementById('max-temp').value || 22;
+
+    if (parseInt(minTemp) >= parseInt(maxTemp)) {
+        alert("La temperatura mínima no puede ser mayor o igual a la máxima.");
+        return;
+    }
+
+    fetch('/actualizar-limites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ minTemp, maxTemp })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Hubo un problema al actualizar los límites.");
+    });
+}
+
+function obtenerTemperaturaActual() {
+    fetch('/obtener-temperatura', {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        const temperatura = data.temperatura;
+        document.getElementById('display-temperatura-actual').innerText = `Temperatura actual: ${temperatura} °C`;
+    })
+    .catch(error => {
+        console.error('Error al obtener la temperatura:', error);
+        document.getElementById('display-temperatura-actual').innerText = `Error al cargar la temperatura.`;
+    });
+}
+setInterval(obtenerTemperaturaActual, 1000);
+obtenerTemperaturaActual();
+
+function verificarTemperaturaPeriodicamente() {
+    setInterval(() => {
+        fetch('/verificar-temperatura')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.mensaje);
+            })
+            .catch(error => console.error('Error al verificar la temperatura:', error));
+    }, 1000);
+}
+verificarTemperaturaPeriodicamente();
 
 function potencia(slider, spanID, dispositivo) {
     const valorPotencia = slider.value;

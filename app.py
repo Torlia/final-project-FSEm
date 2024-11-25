@@ -1,4 +1,7 @@
 from flask import Flask, send_from_directory, render_template, request, jsonify
+import threading
+import time
+from datetime import datetime, timedelta
 #import smbus
 #import struct
 
@@ -10,8 +13,16 @@ app = Flask(__name__)
 dispositivos = {
     'radiador': 0x01,
     'ventilador1': 0x02,
-    'ventilador2': 0x03
+    'ventilador2': 0x03,
+    'bomba': 0x04
 }
+temperatura = 0.0
+temp_min = 18.0
+temp_max = 20.0
+ciclo_riego = None
+ciclo_temperatura = None
+ciclo_thread = None
+hora_fin = "00:00"
 
 @app.route("/")
 def dashboard():
@@ -27,7 +38,8 @@ def control_irrigacion():
     estado = data.get('estado')
     try:
         #estado_value = 1 if estado == 'on' else 0
-        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [estado_value])
+        #data_sent = [dispositivos['bomba'], estado_value]
+        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [data_sent])
         #i2c.i2c_rdwr(msg)
         print(f"Enviando a Pico: Irrigación {estado}")
     except Exception as e:
@@ -38,24 +50,62 @@ def control_irrigacion():
 
 @app.route("/programar-ciclo", methods=["POST"])
 def programar_ciclo():
+    global ciclo_thread, hora_fin
     data = request.get_json()
     tipo = data.get('tipo')
     hora_inicio = data.get('horaInicio')
-    duracion = data.get('duracion')
+    duracion = int(data.get('duracion'))
     frecuencia = data.get('frecuencia')
     try:
-        #horas, minutos = map(int, hora_inicio.split(':'))
-        #if horas > 255 or minutos > 255 or duracion > 255 or frecuencia > 255:
-        #    raise ValueError("Los valores de hora o duración o frecuencia son demasiado altos.")
-        #data_sent = [horas, minutos, duracion, frecuencia]
-        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
-        #i2c.i2c_rdwr(msg)
-        print(f"Enviando a Pico: Hora {hora_inicio}, Duración {duracion} minutos, Frecuencia {frecuencia} días")
+        horas, minutos = map(int, hora_inicio.split(":"))
+        minutos += duracion
+        if minutos >= 60:
+            horas += minutos // 60
+            minutos = minutos % 60
+        hora_fin = f"{horas % 24:02d}:{minutos:02d}"
+        if ciclo_thread and ciclo_thread.is_alive():
+            ciclo_thread.join()
+        ciclo_thread = threading.Thread(
+            target=supervisar_ciclo,
+            args=(tipo, hora_inicio, hora_fin, dispositivos['bomba'], frecuencia)
+        )
+        ciclo_thread.start()
     except Exception as e:
-        print(f"Error enviando datos a Pico: {e}")
-        return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
+        print(f"Error programando ciclo: {e}")
+        return jsonify({"error": "Error al programar ciclo."}), 500
 
     return jsonify({"message": f"Ciclo de {tipo} programado para comenzar a las {hora_inicio} por {duracion} minutos cada {frecuencia} días"})
+
+@app.route("/supervisar-ciclo", methods=["POST"])
+def supervisar_ciclo(tipo, hora_inicio, hora_fin, dispositivo, frecuencia):
+    data = request.get_json()
+    hora_inicio = data.get('horaInicio')
+
+    while True:
+        fecha_actual = datetime.now()
+        hora_actual = fecha_actual.strftime("%H:%M")
+        dia_actual = fecha_actual.strftime("%d")
+
+        if hora_actual == hora_inicio:
+            # data_sent = [dispositivos['bomba'], 1]
+            # smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
+            # i2c.i2c_rdwr(msg)
+            print(f"{tipo} iniciado a las {hora_actual}")
+
+        last_irrigation = datetime.min.replace(year=datetime.now().year, month=datetime.now().month, day=datetime.now().day)
+        days_since_last_irrigation = (fecha_actual - last_irrigation).days
+        if days_since_last_irrigation >= frecuencia:
+            print(f"Riego ejecutado")
+            # data_sent = [dispositivos['bomba'], 1]
+            # smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
+            # i2c.i2c_rdwr(msg)
+            last_irrigation = fecha_actual
+
+        if hora_actual == hora_fin:
+            # data_sent = [dispositivos['bomba'], 0]
+            # smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
+            # i2c.i2c_rdwr(msg)
+            print(f"{tipo} terminado a las {hora_actual}")
 
 @app.route("/programar-ciclo-temperatura", methods=["POST"])
 def programar_ciclo_temperatura():
@@ -73,6 +123,57 @@ def programar_ciclo_temperatura():
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
+
+@app.route("/obtener-temperatura", methods=["GET"])
+def obtener_temperatura():
+    global temperatura
+    try:
+        with open('/home/user/Documents/sensor.txt', 'r') as file:
+            content = file.read().replace('\n', ' ')
+            temperatura = float(content)
+
+        return jsonify({"temperatura": temperatura}), 200
+    except Exception as e:
+        print(f"Error al obtener la temperatura: {e}")
+        return jsonify({"error": "No se pudo obtener la temperatura"}), 500
+
+@app.route('/actualizar-limites', methods=['POST'])
+def actualizar_limites():
+    global temp_min, temp_max
+    data = request.get_json()
+    temp_min = float(data.get('minTemp'))
+    temp_max = float(data.get('maxTemp'))
+
+    if not temp_min or not temp_max or temp_min >= temp_max:
+        return jsonify({"message": "Error: los límites de temperatura no son válidos."}), 400
+
+    #data_sent = [temp_min, temp_max]
+    #msg = smbus2.i2c_msg.write(SLAVE_ADDR, data_sent)
+    #i2c.i2c_rdwr(msg)
+    print(f"Temperatura mínima: {temp_min}°C, Temperatura máxima: {temp_max}°C")
+    return jsonify({"message": "Límites de temperatura actualizados correctamente."})
+
+@app.route('/verificar-temperatura', methods=['GET'])
+def verificar_temperatura():
+    global temperatura, temp_min, temp_max
+    if temperatura is None:
+        return jsonify({"mensaje": "Error: No se pudo obtener la temperatura actual."})
+
+    if temperatura < temp_min:
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 0])
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 1])
+        print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
+        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Radiador encendido."})
+    elif temperatura > temp_max:
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 0])
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 1])
+        print("Temperatura actual:", temperatura,"°C. Ventilador 2 encendido.")
+        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Ventilador 2 encendido."})
+    else:
+        print("Temperatura actual:", temperatura, "°C. Dispositivos apagados.")
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 0])
+        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 0])
+        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Todo en orden, dispositivos apagados."})
 
 @app.route("/actualizar-potencia", methods=["POST"])
 def actualizar_potencia():
