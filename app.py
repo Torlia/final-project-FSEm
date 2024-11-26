@@ -195,22 +195,18 @@ def verificar_temperatura():
 @app.route("/actualizar-potencia", methods=["POST"])
 def actualizar_potencia():
     data = request.get_json()
-    dispositivo = data.get('dispositivo')
-    valor_potencia = int(data.get('valorPotencia'))
-
-    if dispositivo not in dispositivos:
-        return jsonify({"error": "Dispositivo no válido."}), 400
+    dispositivo = int(data.get('dispositivo'))
+    valor_potencia = float(data.get('valorPotencia'))
 
     try:
-        identificador = dispositivos[dispositivo]
-        # msg = smbus2.i2c_msg.write(SLAVE_ADDR, [identificador, valor_potencia])
+        # msg = smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivo, valor_potencia])
         # i2c.i2c_rdwr(msg)
         print(f"Enviando a Pico: Dispositivo {dispositivo} (ID: {identificador}), Potencia {valor_potencia}")
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
 
-    return jsonify({"message": f"Potencia de {dispositivo} actualizada a {valor_potencia}%"})
+    return jsonify({"message": f"Potencia de ventilador {dispositivo} actualizada a {valor_potencia}%"})
 
 @app.route("/historico-datos", methods=["GET"])
 def historico_datos():
