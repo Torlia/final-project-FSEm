@@ -192,8 +192,12 @@ def actualizar_potencia():
     data = request.get_json()
     dispositivo = int(data.get('dispositivo'))
     valor_potencia = float(data.get('valorPotencia'))
-    packed_data = struct.pack("<bf", dispositivo, valor_potencia)
+    
+    if not (0 <= valor_potencia <= 100):
+        return jsonify({"error": "Potencia debe estar entre 0 y 100"}), 400
 
+    packed_data = struct.pack("<bf", dispositivo, valor_potencia)
+    
     try:
         msg = smbus2.i2c_msg.write(SLAVE_ADDR, packed_data)
         i2c.i2c_rdwr(msg)

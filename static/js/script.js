@@ -143,9 +143,13 @@ function verificarTemperaturaPeriodicamente() {
 }
 verificarTemperaturaPeriodicamente();
 
-function potencia(slider, spanID, dispositivo) {
-    const valorPotencia = slider.value;
-    document.getElementById(spanID).innerText = valorPotencia + "%";
+function potencia(inputID, dispositivo) {
+    const valorPotencia = document.getElementById(inputID).value;
+
+    if (isNaN(valorPotencia) || valorPotencia < 0 || valorPotencia > 100) {
+        alert("La potencia debe estar entre 0 y 100.");
+        return;
+    }
 
     fetch('/actualizar-potencia', {
         method: 'POST',
