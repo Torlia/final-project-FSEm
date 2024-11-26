@@ -33,24 +33,28 @@ function programarCiclo(tipo) {
         alert("La frecuencia no puede ser mayor a 7 días, ya que las plantas requieren agua.");
         return;
     }
+    if (!horaInicio) {
+        alert("La hora de inicio es requerida.");
+        return;
+    }
 
     fetch('/programar-ciclo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tipo, horaInicio, duracion, frecuencia})
+        body: JSON.stringify({ tipo, hora_inicio:horaInicio, duracion, frecuencia})
     })
     .then(response => response.json())
     .then(data => {
         alert(`Ciclo de ${tipo} programado con éxito: ${data.message}`);
         document.getElementById('ciclo-programado').innerText = 
-            `Ciclo programado a las ${horaInicio} por ${duracion} min, cada ${frecuencia} días`;
+            `Ciclo programado a las ${horaInicio} por ${duracion} seg, cada ${frecuencia} días`;
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
 
-function verificarCicloPeriodicamente() {
+/*function verificarCicloPeriodicamente() {
     setInterval(() => {
         fetch('/supervisar-ciclo')
             .then(response => response.json())
@@ -60,7 +64,7 @@ function verificarCicloPeriodicamente() {
             .catch(error => console.error('Error al supervisar el ciclo en ejecución:', error));
     }, 1000);
 }
-verificarCicloPeriodicamente();
+verificarCicloPeriodicamente();*/
 
 function programarCicloTemperatura(tipo) {
     const horaInicio = document.getElementById('hora-inicio-temperatura').value;

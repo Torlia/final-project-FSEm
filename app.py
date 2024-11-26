@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory, render_template, request, jsonify
 import threading
 import time
+from timeloop import Timeloop
 from datetime import datetime, timedelta
 #import smbus
 #import struct
@@ -19,10 +20,17 @@ dispositivos = {
 temperatura = 0.0
 temp_min = 18.0
 temp_max = 20.0
-ciclo_riego = None
+'''ciclo_riego = None
 ciclo_temperatura = None
 ciclo_thread = None
 hora_fin = "00:00"
+hora_inicio = "00:00"
+frecuencia = 0'''
+
+tl = Timeloop()
+frecuencia = 2
+duracion = 3
+ciclo_irrigacion_thread = None
 
 @app.route("/")
 def dashboard():
@@ -50,7 +58,50 @@ def control_irrigacion():
 
 @app.route("/programar-ciclo", methods=["POST"])
 def programar_ciclo():
-    global ciclo_thread, hora_fin
+    global ciclo_irrigacion_thread
+    data = request.get_json()
+    hora_inicio = str(data.get('hora_inicio'))
+    duracion = int(data.get('duracion')) 
+    frecuencia = int(data.get('frecuencia'))
+
+    frecuencia_segundos = frecuencia * 86400 
+
+    if ciclo_irrigacion_thread is not None:
+        ciclo_irrigacion_thread.cancel()
+
+    if not hora_inicio or not duracion or not frecuencia:
+        return jsonify({"error": "Datos incompletos"}), 400
+
+    ahora = datetime.now()
+    hora_inicio_dt = datetime.strptime(hora_inicio, '%H:%M')
+    segundos_inicio = (
+        (hora_inicio_dt.hour - ahora.hour) * 3600 +
+        (hora_inicio_dt.minute - ahora.minute) * 60 -
+        ahora.second
+    )
+    if segundos_inicio < 0:
+        segundos_inicio += 86400  # Ajustar para el día siguiente si ya pasó la hora de inicio
+
+    @tl.job(interval=timedelta(seconds=frecuencia_segundos))
+    def ciclo_irrigacion():
+        print(f"Iniciando irrigación a las {datetime.now().strftime('%H:%M:%S')}")
+        #data_sent = [dispositivos['bomba'], 1]
+        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [data_sent])
+        #i2c.i2c_rdwr(msg)
+        time.sleep(duracion)
+        #data_sent = [dispositivos['bomba'], 0]
+        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [data_sent])
+        #i2c.i2c_rdwr(msg)
+        print(f"Finalizando irrigación a las {datetime.now().strftime('%H:%M:%S')}")
+
+    ciclo_irrigacion_thread = threading.Timer(segundos_inicio, lambda: ciclo_irrigacion())
+    ciclo_irrigacion_thread.start()
+
+    return jsonify({"message": f"Ciclo programado: cada {frecuencia} días, comenzando a las {hora_inicio}"})
+
+
+    '''
+    global ciclo_thread, hora_fin, hora_inicio, frecuencia
     data = request.get_json()
     tipo = data.get('tipo')
     hora_inicio = data.get('horaInicio')
@@ -75,10 +126,11 @@ def programar_ciclo():
         return jsonify({"error": "Error al programar ciclo."}), 500
 
     return jsonify({"message": f"Ciclo de {tipo} programado para comenzar a las {hora_inicio} por {duracion} minutos cada {frecuencia} días"})
+    '''
 
 @app.route("/supervisar-ciclo", methods=["POST"])
-def supervisar_ciclo(tipo, hora_inicio, hora_fin, dispositivo, frecuencia):
-    data = request.get_json()
+def supervisar_ciclo():
+    global hora_inicio, frecuencia
     hora_inicio = data.get('horaInicio')
 
     while True:
@@ -107,6 +159,7 @@ def supervisar_ciclo(tipo, hora_inicio, hora_fin, dispositivo, frecuencia):
             # i2c.i2c_rdwr(msg)
             print(f"{tipo} terminado a las {hora_actual}")
 
+'''
 @app.route("/programar-ciclo-temperatura", methods=["POST"])
 def programar_ciclo_temperatura():
     data = request.get_json()
@@ -123,7 +176,7 @@ def programar_ciclo_temperatura():
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
-
+    '''
 @app.route("/obtener-temperatura", methods=["GET"])
 def obtener_temperatura():
     global temperatura
@@ -221,4 +274,5 @@ def historico_datos():
     return jsonify(datos_dummy)
 
 if __name__ == "__main__":
+    threading.Thread(target=lambda: tl.start(block=True), daemon=True).start()
     app.run(host="0.0.0.0", port=5000)

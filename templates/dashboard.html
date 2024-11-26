@@ -33,13 +33,13 @@
         <form id="programa-irrigacion" style="margin-top:10px;">
             <label for="hora-inicio">Hora de inicio:</label>
             <input type="time" id="hora-inicio-irrigacion" value="10:00" step="60">
-            <label for="duracion">Duración (min):</label>
-            <input type="number" id="duracion-irrigacion" min="1" max="60" value="5">
+            <label for="duracion">Duración (seg):</label>
+            <input type="number" id="duracion-irrigacion" min="1" max="60" value="3">
             <label for="frecuencia"> Frecuencia (días):</label>
-            <input type="number" id="frecuencia-irrigacion" min="1" max="7" value="3">
+            <input type="number" id="frecuencia-irrigacion" min="1" max="7" value="2">
             <button type="button" onclick="programarCiclo('irrigacion')">Programar</button>
         </form>
-        <p id="ciclo-programado">Ciclo programado a las 10:00 por 5 min, cada 3 días</p>
+        <p id="ciclo-programado">Ciclo programado a las 10:00 por 1 min, cada 2 días</p>
     </div>
 
     <div class="tarjeta-funcionalidad" style="margin-bottom: 0%;">
