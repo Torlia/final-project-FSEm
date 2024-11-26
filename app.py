@@ -1,10 +1,10 @@
 from flask import Flask, send_from_directory, render_template, request, jsonify
 import threading
 import time
-from timeloop import Timeloop
+#from timeloop import Timeloop
 from datetime import datetime, timedelta
-#import smbus
-#import struct
+import smbus
+import struct
 
 #i2c = smbus2.SMBus(1)
 #SLAVE_ADDR = 0x0A
@@ -21,7 +21,7 @@ temperatura = 0.0
 temp_min = 18.0
 temp_max = 20.0
 
-tl = Timeloop()
+#tl = Timeloop()
 frecuencia = 2
 duracion = 3
 ciclo_irrigacion_thread = None
@@ -77,7 +77,7 @@ def programar_ciclo():
     if segundos_inicio < 0:
         segundos_inicio += 86400  # Ajustar para el día siguiente si ya pasó la hora de inicio
 
-    @tl.job(interval=timedelta(seconds=frecuencia_segundos))
+    #@tl.job(interval=timedelta(seconds=frecuencia_segundos))
     def ciclo_irrigacion():
         print(f"Iniciando irrigación a las {datetime.now().strftime('%H:%M:%S')}")
         #data_sent = [dispositivos['bomba'], 1]
@@ -105,8 +105,8 @@ def programar_ciclo_temperatura():
         return jsonify({"error": "Datos incompletos"}), 400
     
 
-    if ciclo_irrigacion_thread is not None:
-        ciclo_irrigacion_thread.cancel()
+    if ciclo_temperatura_thread is not None:
+        ciclo_temperatura_thread.cancel()
 
     ahora = datetime.now()
     hora_inicio_dt = datetime.strptime(hora_inicio, '%H:%M')
@@ -121,7 +121,7 @@ def programar_ciclo_temperatura():
 
     duracion_ciclo = (hora_fin_dt - hora_inicio_dt).seconds 
 
-    @tl.job(interval=timedelta(seconds=86400))
+    #@tl.job(interval=timedelta(seconds=86400))
     def ciclo_temperatura():
         print(f"Iniciando ciclo de temperatura a las {datetime.now().strftime('%H:%M:%S')}")
         #data_sent = [dispositivos['radiador'], 1]
@@ -141,10 +141,14 @@ def programar_ciclo_temperatura():
 def obtener_temperatura():
     global temperatura
     try:
-        with open('/home/user/Documents/sensor.txt', 'r') as file:
+        with open('/sys/bus/w1/devices/28-3ce1d444ecd1/temperature', 'r') as file:
             content = file.read().replace('\n', ' ')
-            temperatura = float(content)
+            temp1 = float(content)/1000
+        with open('/sys/bus/w1/devices/28-1906d444568b/temperature', 'r') as file:
+            content2 = file.read().replace('\n', ' ')
+            temp2 = float(content2)/1000
 
+        temperatura = (temp1+temp2)/2
         return jsonify({"temperatura": temperatura}), 200
     except Exception as e:
         print(f"Error al obtener la temperatura: {e}")
@@ -234,5 +238,5 @@ def historico_datos():
     return jsonify(datos_dummy)
 
 if __name__ == "__main__":
-    threading.Thread(target=lambda: tl.start(block=True), daemon=True).start()
+    #threading.Thread(target=lambda: tl.start(block=True), daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
