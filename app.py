@@ -3,11 +3,11 @@ import threading
 import time
 #from timeloop import Timeloop
 from datetime import datetime, timedelta
-import smbus
+import smbus2
 import struct
 
-#i2c = smbus2.SMBus(1)
-#SLAVE_ADDR = 0x0A
+i2c = smbus2.SMBus(1)
+SLAVE_ADDR = 0x0A
 
 app = Flask(__name__)
 
@@ -197,11 +197,12 @@ def actualizar_potencia():
     data = request.get_json()
     dispositivo = int(data.get('dispositivo'))
     valor_potencia = float(data.get('valorPotencia'))
+    packed_data = struct.pack("<bf", dispositivo, valor_potencia)
 
     try:
-        # msg = smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivo, valor_potencia])
-        # i2c.i2c_rdwr(msg)
-        print(f"Enviando a Pico: Dispositivo {dispositivo} (ID: {identificador}), Potencia {valor_potencia}")
+        msg = smbus2.i2c_msg.write(SLAVE_ADDR, packed_data)
+        i2c.i2c_rdwr(msg)
+        print(f"Enviando a Pico: Dispositivo {dispositivo}, Potencia {valor_potencia}")
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
