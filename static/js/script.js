@@ -1,11 +1,7 @@
 function controlRiego() {
-    const toggle = document.getElementById('irrigacionToggle');
-    const estado = toggle.checked ? 'on' : 'off';
-
     fetch('/control-irrigacion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado })
     })
     .then(response => response.json())
     .then(data => {

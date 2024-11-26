@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import smbus2
 import struct
 
+from time import sleep
+
 i2c = smbus2.SMBus(1)
 SLAVE_ADDR = 0x0A
 
@@ -21,6 +23,35 @@ duracion = 3
 ciclo_irrigacion_thread = None
 ciclo_temperatura_thread = None
 
+
+def verificar_temperatura():
+    global temperatura, temp_min, temp_max
+
+    while True:
+        if temperatura < temp_min:
+            data = struct.pack("<bf", 7, 0.00)
+            msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+            i2c.i2c_rdwr(msg)
+            sleep(1)
+            print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
+        elif temperatura > temp_max:
+            data = struct.pack("<bf", 5, 0.00)
+            msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+            i2c.i2c_rdwr(msg)
+            sleep(1)
+            print("Temperatura actual:", temperatura,"°C. Ventilador 2 encendido.")
+        else:
+            print("Temperatura actual:", temperatura, "°C. Dispositivos apagados.")
+            data = struct.pack("<bf", 6, 0.00)
+            msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+            i2c.i2c_rdwr(msg)
+            sleep(1)
+            data = struct.pack("<bf", 8, 0.00)
+            msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+            i2c.i2c_rdwr(msg)
+            sleep(1)
+
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
@@ -31,19 +62,16 @@ def graph():
 
 @app.route("/control-irrigacion", methods=["POST"])
 def control_irrigacion():
-    data = request.get_json()
-    estado = data.get('estado')
     try:
-        #estado_value = 1 if estado == 'on' else 0
-        #data_sent = [dispositivos['bomba'], estado_value]
-        #msg = smbus2.i2c_msg.write(SLAVE_ADDR, [data_sent])
-        #i2c.i2c_rdwr(msg)
-        print(f"Enviando a Pico: Irrigación {estado}")
+        packed_data = struct.pack("<bf", 9, 1)
+        msg = smbus2.i2c_msg.write(SLAVE_ADDR, packed_data)
+        i2c.i2c_rdwr(msg)
+        print(f"Enviando a Pico: Irrigación activada")
     except Exception as e:
         print(f"Error enviando datos a Pico: {e}")
         return jsonify({"error": "Error al enviar datos a la Raspberry Pi."}), 500
     
-    return jsonify({"message": f"{estado}"})
+    return jsonify({"message": "Irrigación activada con éxito"})
 
 @app.route("/programar-ciclo", methods=["POST"])
 def programar_ciclo():
@@ -111,9 +139,7 @@ def programar_ciclo_temperatura():
         ahora.second
     )
     if segundos_inicio < 0:
-        segundos_inicio += 86400
-
-    duracion_ciclo = (hora_fin_dt - hora_inicio_dt).seconds 
+        duracion_ciclo = (hora_fin_dt - hora_inicio_dt).seconds 
 
     #@tl.job(interval=timedelta(seconds=86400))
     def ciclo_temperatura():
@@ -164,33 +190,46 @@ def actualizar_limites():
     print(f"Temperatura mínima: {temp_min}°C, Temperatura máxima: {temp_max}°C")
     return jsonify({"message": "Límites de temperatura actualizados correctamente."})
 
-@app.route('/verificar-temperatura', methods=['GET'])
-def verificar_temperatura():
-    global temperatura, temp_min, temp_max
-    if temperatura is None:
-        return jsonify({"mensaje": "Error: No se pudo obtener la temperatura actual."})
+#@app.route('/verificar-temperatura', methods=['GET'])
+#def verificar_temperatura():
+#    global temperatura, temp_min, temp_max
+#    if temperatura is None:
+#        return jsonify({"mensaje": "Error: No se pudo obtener la temperatura actual."})
 
-    if temperatura < temp_min:
-        data = struct.pack("<bf", 6, 100.0)
-        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
-        i2c.i2c_rdwr(msg)
-        print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
-        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Radiador encendido."})
-    elif temperatura > temp_max:
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 0])
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 1])
-        print("Temperatura actual:", temperatura,"°C. Ventilador 2 encendido.")
-        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Ventilador 2 encendido."})
-    else:
-        print("Temperatura actual:", temperatura, "°C. Dispositivos apagados.")
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 0])
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 0])
-        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Todo en orden, dispositivos apagados."})
+#    if temperatura < temp_min:
+#        data = struct.pack("<bf", 7, 30.0)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        data = struct.pack("<bf", 6, 0.00)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
+#        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Radiador encendido."})
+#    elif temperatura > temp_max:
+#        data = struct.pack("<bf", 5, 0.00)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        data = struct.pack("<bf", 8, 0.00)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        print("Temperatura actual:", temperatura,"°C. Ventilador 2 encendido.")
+#        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Ventilador 2 encendido."})
+#    else:
+#        print("Temperatura actual:", temperatura, "°C. Dispositivos apagados.")
+#        data = struct.pack("<bf", 6, 0.00)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        data = struct.pack("<bf", 8, 0.00)
+#        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+#        i2c.i2c_rdwr(msg)
+#        return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Todo en orden, dispositivos apagados."})
 
 @app.route("/actualizar-potencia", methods=["POST"])
 def actualizar_potencia():
     data = request.get_json()
     dispositivo = int(data.get('dispositivo'))
+    valor_potencia = float(data.get('valorPotencia'))
+    
     valor_potencia = float(data.get('valorPotencia'))
     
     if not (0 <= valor_potencia <= 100):
@@ -235,4 +274,6 @@ def historico_datos():
 
 if __name__ == "__main__":
     #threading.Thread(target=lambda: tl.start(block=True), daemon=True).start()
+    t1 = threading.Thread(target=verificar_temperatura, args=())
+    t1.start()
     app.run(host="0.0.0.0", port=5000)
