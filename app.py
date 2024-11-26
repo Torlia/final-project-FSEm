@@ -11,12 +11,6 @@ SLAVE_ADDR = 0x0A
 
 app = Flask(__name__)
 
-dispositivos = {
-    'radiador': 0x01,
-    'ventilador1': 0x02,
-    'ventilador2': 0x03,
-    'bomba': 0x04
-}
 temperatura = 0.0
 temp_min = 18.0
 temp_max = 20.0
@@ -177,8 +171,9 @@ def verificar_temperatura():
         return jsonify({"mensaje": "Error: No se pudo obtener la temperatura actual."})
 
     if temperatura < temp_min:
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['ventilador2'], 0])
-        # smbus2.i2c_msg.write(SLAVE_ADDR, [dispositivos['radiador'], 1])
+        data = struct.pack("<bf", 6, 100.0)
+        msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
+        i2c.i2c_rdwr(msg)
         print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
         return jsonify({"mensaje": f"Temperatura actual: {temperatura}°C. Radiador encendido."})
     elif temperatura > temp_max:
