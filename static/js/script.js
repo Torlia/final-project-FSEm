@@ -54,18 +54,6 @@ function programarCiclo(tipo) {
     });
 }
 
-/*function verificarCicloPeriodicamente() {
-    setInterval(() => {
-        fetch('/supervisar-ciclo')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.mensaje);
-            })
-            .catch(error => console.error('Error al supervisar el ciclo en ejecución:', error));
-    }, 1000);
-}
-verificarCicloPeriodicamente();*/
-
 function programarCicloTemperatura(tipo) {
     const horaInicio = document.getElementById('hora-inicio-temperatura').value;
     const horaFin = document.getElementById('hora-fin-temperatura').value;
