@@ -5,7 +5,7 @@ function controlRiego() {
     })
     .then(response => response.json())
     .then(data => {
-        alert(`Estado de irrigación encendido`);
+        alert(`Estado de irrigación: ${data.message}`);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -127,7 +127,7 @@ function obtenerTemperaturaActual() {
 setInterval(obtenerTemperaturaActual, 1000);
 obtenerTemperaturaActual();
 
-/*function verificarTemperaturaPeriodicamente() {
+function verificarTemperaturaPeriodicamente() {
     setInterval(() => {
         fetch('/verificar-temperatura')
             .then(response => response.json())
@@ -137,7 +137,7 @@ obtenerTemperaturaActual();
             .catch(error => console.error('Error al verificar la temperatura:', error));
     }, 1000);
 }
-verificarTemperaturaPeriodicamente();*/
+verificarTemperaturaPeriodicamente();
 
 function potencia(inputID, dispositivo) {
     const valorPotencia = document.getElementById(inputID).value;
@@ -172,10 +172,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     labels: datos.temperaturas.map(item => item.hora),
                     datasets: [
                         {
-                            label: 'Temperatura Actual (°C)',
-                            data: datos.temperaturas.map(item => item.actualTemp),
-                            borderColor: 'yellow',
-                            backgroundColor: 'rgba(255, 255, 0, 0.1)',
+                            label: 'Temperatura Mínima (°C)',
+                            data: datos.temperaturas.map(item => item.minTemp),
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Temperatura Máxima (°C)',
+                            data: datos.temperaturas.map(item => item.maxTemp),
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255, 0, 0, 0.1)',
                             fill: true
                         }
                     ]
@@ -184,8 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     scales: {
                         y: {
-                            min: -10,
-                            max: 40,
+                            beginAtZero: true,
                             ticks: {
                                 color: 'white'
                             }
@@ -209,12 +215,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const ctxIrrigacion = document.getElementById('graficaIrrigacion').getContext('2d');
             new Chart(ctxIrrigacion, {
-                type: 'scatter',
+                type: 'bar',
                 data: {
                     labels: datos.irrigacion.map(item => item.hora),
                     datasets: [
                         {
-                            label: 'Estado de Irrigación',
+                            label: 'Estado de Irrigación (1 = On, 0 = Off)',
                             data: datos.irrigacion.map(item => item.estado === 'on' ? 1 : 0),
                             backgroundColor: 'green'
                         }
@@ -299,4 +305,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
         });
     });
-

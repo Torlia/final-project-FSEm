@@ -1,0 +1,43 @@
+{
+    "temperaturas": [
+        {
+            "hora": "11/27/24 20:00:33",
+            "actualTemp": 19.781
+        },
+        {
+            "hora": "11/27/24 20:00:33",
+            "actualTemp": 19.781
+        },
+        {
+            "hora": "11/27/24 20:00:33",
+            "actualTemp": 19.8125
+        },
+        {
+            "hora": "11/27/24 20:00:34",
+            "actualTemp": 19.8125
+        },
+        {
+            "hora": "11/27/24 20:00:34",
+            "actualTemp": 19.8125
+        },
+        {
+            "hora": "11/27/24 20:00:35",
+            "actualTemp": 19.812
+        }
+    ],
+    "irrigacion": [],
+    "acciones": [
+        {
+            "hora": "11/27/24 20:00:32",
+            "tipo": "radiador"
+        },
+        {
+            "hora": "11/27/24 20:00:33",
+            "tipo": "radiador"
+        },
+        {
+            "hora": "11/27/24 20:00:34",
+            "tipo": "radiador"
+        }
+    ]
+}
