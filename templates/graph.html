@@ -8,7 +8,7 @@
               Torres Bravo Cecilia
     License:  MIT
 -->
-    
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -18,10 +18,14 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
     <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- Page title to "Graphs" -->
     <title>Graphs</title>
   </head>
 
   <body>
+
+     <!-- Displaying the historical temperature chart -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Histórico de Temperatura</h2>
@@ -29,6 +33,7 @@
         <canvas id="graficaTemperatura"></canvas>
     </div>
 
+    <!-- Card for displaying the historical irrigation chart -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Histórico de Irrigación</h2>
@@ -36,6 +41,7 @@
         <canvas id="graficaIrrigacion"></canvas>
     </div>
 
+    <!-- Displaying the historical actions chart -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Histórico de Acciones</h2>
@@ -43,6 +49,7 @@
         <canvas id="graficaAcciones"></canvas>
     </div>
 
+    <!-- Button to navigate back to the dashboard -->
     <a href="{{ url_for('dashboard' )}}">
         <button class="start-button" onclick="">Regresar</button>
     </a>

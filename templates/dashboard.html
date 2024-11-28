@@ -18,14 +18,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- Setting the page title to "Dashboard" -->
     <title>Dashboard</title>
 </head>
 
 <body>
+    <!-- Header with the name "Control Invernadero" -->
     <header>
         Control Invernadero
     </header>
 
+    <!-- Irrigation control with a button to turn on irrigation -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Irrigación</h2>
@@ -35,81 +39,123 @@
         </div>
     </div>
 
+    <!-- Card for scheduling irrigation cycles -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Programar Ciclo de Irrigación</h2>
         </div>
         <form id="programa-irrigacion" style="margin-top:10px;">
+            <!-- Input for the start time of the irrigation cycle -->
             <label for="hora-inicio">Hora de inicio:</label>
             <input type="time" id="hora-inicio-irrigacion" value="10:00" step="60">
+
+            <!-- Input for the duration of the irrigation cycle -->
             <label for="duracion">Duración (seg):</label>
             <input type="number" id="duracion-irrigacion" min="1" max="60" value="3">
+
+            <!-- Input for the frequency of the irrigation cycle (in days) -->
             <label for="frecuencia"> Frecuencia (días):</label>
             <input type="number" id="frecuencia-irrigacion" min="1" max="7" value="2">
+
+            <!-- Button to schedule the irrigation cycle -->
             <button type="button" onclick="programarCiclo('irrigacion')">Programar</button>
         </form>
+
+        <!-- Display scheduled irrigation cycle info -->
         <p id="ciclo-programado">Ciclo programado a las 10:00 por 1 min, cada 2 días</p>
     </div>
 
+     <!-- Scheduling the temperature control cycle -->
     <div class="tarjeta-funcionalidad" style="margin-bottom: 0%;">
         <div class="tarjeta-titulo">
             <h2>Programar Ciclo de Temperatura</h2>
         </div>
         <form id="control-temperatura" style="margin-top:10px;">
-
+            <!-- Input for the start time of the temperature cycle -->
             <label for="hora-inicio-temperatura">Hora de Inicio:</label>
             <input type="time" id="hora-inicio-temperatura" value="10:00">
+
+            <!-- Input for the end time of the temperature cycle -->
             <label for="hora-fin-temperatura">Hora de Fin:</label>
             <input type="time" id="hora-fin-temperatura" value="20:00">
+
+            <!-- Button to schedule the temperature cycle -->
             <button type="button" onclick="programarCicloTemperatura('temperatura')">Programar</button>
         </form>
+
+        <!-- Display scheduled temperature cycle info -->
         <p id="display-ciclo-temperatura">Ciclo programado de las 10:00 a las 20:00</p>
     </div>    
 
+    <!-- Card for climate control settings -->
     <div class="tarjeta-funcionalidad">
         <div class="tarjeta-titulo">
             <h2>Control de Clima</h2>
         </div>
+
+        <!-- Display the current temperature -->
         <p id="display-temperatura-actual">Temperatura actual: 0</p>
+
+         <!-- Input fields for setting the minimum and maximum temperature limits -->
         <div id="temp-limits" style="margin-bottom:0%;">
             <input type="number" id="min-temp" placeholder="Temperatura mínima" oninput="updateTempLimits()">
             <input type="number" id="max-temp" placeholder="Temperatura máxima" oninput="updateTempLimits()">
         </div>
+
+        <!-- Button to update the temperature settings -->
         <button type="button" onclick="updateTemperature()" style="margin-top: 1%;">Actualizar</button>
+        
+        <!-- Display the set minimum and maximum temperature values -->
         <div id="temp-messages">
             <p>La temperatura mínima se encuentra establecida en: <span id="display-min-temp">18</span>°C</p>
             <p>La temperatura máxima se encuentra establecida en: <span id="display-max-temp">20</span>°C</p>
         </div>
     </div>
-    
+
+    <!-- Container for controlling the radiator and fan power -->
   <div class="centered-container" style="margin-bottom:0%">
+
+    <!-- Card for radiator power control -->
       <div class="tarjeta-funcionalidad" id="radiadorTarjeta">
           <div class="tarjeta-titulo">
               <h2>Control de potencia del radiador</h2>
           </div>
+          <!-- Input to control radiator power -->
           <div class="slider-contenedor">
               <input type="number" id="radiador" min="0" max="100" placeholder="Potencia (%)">
+
+              <!-- Button to update the power settings -->
               <button onclick="potencia('radiador', '2')">Actualizar</button>
           </div>
       </div>
 
+      <!-- Card for fan power control -->
       <div class="tarjeta-funcionalidad" id="ventiladorTarjeta">
           <div class="tarjeta-titulo">
               <h2>Control de potencia del ventilador</h2>
           </div>
           <p style="margin-bottom: 1px;">Ventilador 1:</p>
+
+          <!-- Input to control the fan 1 power -->
           <div class="slider-contenedor">
-              <input type="number" id="ventilador1" min="0" max="100" placeholder="Potencia (%)">	
+              <input type="number" id="ventilador1" min="0" max="100" placeholder="Potencia (%)">
+
+            <!-- Button to update the power settings -->
 	      <button onclick="potencia('ventilador1', '0')">Actualizar</button>
           </div>
           <P style="margin-bottom: 1px;">Ventilador 2:</P>
+
+          <!-- Input to control the fan 2 power -->
           <div class="slider-contenedor">
               <input type="number" id="ventilador2" min="0" max="100" placeholder="Potencia (%)">
+
+              <!-- Button to update the power settings -->
               <button onclick="potencia('ventilador2', '1')">Actualizar</button>
         </div>
       </div>
     </div>
 
+    <!-- Card for linking to the graphs page -->
     <div class="tarjeta-funcionalidad" style="margin-top: 0%;">
         <a href="{{ url_for('graph') }}" style="text-decoration: none; color: inherit;">
             <div class="tarjeta-titulo">

@@ -16,6 +16,7 @@
 * ** *********************************************
 */
 
+// Function to control irrigation by sending a POST request to the server
 function controlRiego() {
     fetch('/control-irrigacion', {
         method: 'POST',
@@ -30,11 +31,13 @@ function controlRiego() {
     });
 }
 
+// Function to program irrigation cycle based on user inputs
 function programarCiclo(tipo) {
     const horaInicio = document.getElementById(`hora-inicio-${tipo}`).value;
     const duracion = document.getElementById(`duracion-${tipo}`).value;
     const frecuencia = document.getElementById(`frecuencia-${tipo}`).value;
 
+    // Checks for valid inputs
     if (isNaN(duracion) || duracion < 1 || duracion % 1 !== 0) {
         alert("La duración debe ser un número entero mayor a 0.");
         return;
@@ -68,10 +71,12 @@ function programarCiclo(tipo) {
     });
 }
 
+// Function to schedule temperature cycle
 function programarCicloTemperatura(tipo) {
     const horaInicio = document.getElementById('hora-inicio-temperatura').value;
     const horaFin = document.getElementById('hora-fin-temperatura').value;
 
+    // Validates start and end times
     if (!horaInicio || !horaFin) {
         alert("Se debe de ingresar hora de inicio y de fin del día.");
         return;
@@ -96,6 +101,7 @@ function programarCicloTemperatura(tipo) {
     });
 }
 
+// Function to update temperature limits (minimum and maximum values)
 function updateTempLimits() {
     const minTemp = document.getElementById('min-temp').value || 14;
     const maxTemp = document.getElementById('max-temp').value || 22;
@@ -104,10 +110,12 @@ function updateTempLimits() {
     document.getElementById('display-max-temp').innerText = maxTemp;
 }
 
+// Function to update temperature limits on the server
 function updateTemperature() {
     const minTemp = document.getElementById('min-temp').value || 14;
     const maxTemp = document.getElementById('max-temp').value || 22;
 
+    // Temperature range validation
     if (parseInt(minTemp) >= parseInt(maxTemp)) {
         alert("La temperatura mínima no puede ser mayor o igual a la máxima.");
         return;
@@ -128,6 +136,7 @@ function updateTemperature() {
     });
 }
 
+// Function to retrieve and display the current temperature
 function obtenerTemperaturaActual() {
     fetch('/mostrar-temperatura', {
         method: 'GET',
@@ -145,21 +154,11 @@ function obtenerTemperaturaActual() {
 setInterval(obtenerTemperaturaActual, 1000);
 obtenerTemperaturaActual();
 
-/*function verificarTemperaturaPeriodicamente() {
-    setInterval(() => {
-        fetch('/verificar-temperatura')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.mensaje);
-            })
-            .catch(error => console.error('Error al verificar la temperatura:', error));
-    }, 1000);
-}
-verificarTemperaturaPeriodicamente();*/
-
+// Function to update device power (e.g., for fans, lights, etc.)
 function potencia(inputID, dispositivo) {
     const valorPotencia = document.getElementById(inputID).value;
 
+    // Validates power input value
     if (isNaN(valorPotencia) || valorPotencia < 0 || valorPotencia > 100) {
         alert("La potencia debe estar entre 0 y 100.");
         return;
@@ -179,10 +178,12 @@ function potencia(inputID, dispositivo) {
     });
 }
 
+// When the document is loaded, retrieve the historical data and display the three graphs
 document.addEventListener('DOMContentLoaded', function() {
     fetch('/historico-datos')
         .then(response => response.json())
         .then(datos => {
+            // Display temperature graph
             const ctxTemp = document.getElementById('graficaTemperatura').getContext('2d');
             new Chart(ctxTemp, {
                 type: 'line',
@@ -225,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
             });
 
+            // Display irrigation graph
             const ctxIrrigacion = document.getElementById('graficaIrrigacion').getContext('2d');
             new Chart(ctxIrrigacion, {
                 type: 'scatter',
@@ -262,7 +264,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }                
             });
-
+            
+            // Display actions graph
             const graph_acciones = document.getElementById('graficaAcciones').getContext('2d');
             const horas = datos.acciones.map(item => item.hora);
             const tipos = datos.acciones.map(item => item.tipo);
