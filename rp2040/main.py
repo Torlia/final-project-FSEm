@@ -1,3 +1,17 @@
+# * ** *********************************************
+# *
+# * main.py
+# * This script controls hardware components in a greenhouse system, including fans,
+# * a heater, and a water pump. It uses I2C communication to receive commands and adjust
+# * the behavior of the system.
+# *
+# * Authors:  De los Cobos García Carlos Alberto
+# *           Sánchez Hernández Marco Antonio
+# *           Torres Bravo Cecilia
+# * License:  MIT
+# *
+# * ** *********************************************
+
 from utime import sleep_ms, sleep_us
 from machine import Pin, PWM, ADC
 from i2cslave import I2CSlave
@@ -5,8 +19,10 @@ from i2cslave import I2CSlave
 import ustruct
 import rp2
 
+# Set up I2C communication as slave at address 0x0A
 i2c = I2CSlave(address=0x0A)
 
+# Initialize pins for controlling devices
 zxpin = Pin(2, Pin.IN)
 trpin = Pin(3, Pin.OUT)
 fan_1 = Pin(19)
@@ -14,17 +30,22 @@ fan_2 = Pin(20)
 water_pump = Pin(21)
 humidity_sensor = ADC(0)
 
+# Initialize PWM (Pulse Width Modulation) to control fan speeds
 fan_1_pwm = PWM(fan_1)
 fan_2_pwm = PWM(fan_2)
 
+# Set PWM frequency for both fans
 frequency = 31
 fan_1_pwm.freq(frequency)
 fan_2_pwm.freq(frequency)
 
+# Default fan speeds and heater brightness
 fan_1_speed = 32768
 fan_2_speed = 32768
 heater_brightness = 20
 
+# Define a state machine for dimmer control 
+# Controls the heater's brightness
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
 def dimmer():
     set(pin, 0)
@@ -61,6 +82,7 @@ def adjust_brightness(brightness):
         sm.active(1)  # Ensure the state machine is active for brightness control
         print(f'Set Brightness: {brightness}% | Delay: {delay}')
 
+# Main function to process commands and control devices
 def main():
     global fan_1_speed, fan_2_speed, heater_brightness
     
@@ -107,5 +129,6 @@ def main():
             sleep_ms(3500)
             water_pump.off()
 
+# Entry point of the program
 if __name__ == "__main__":
     main()
