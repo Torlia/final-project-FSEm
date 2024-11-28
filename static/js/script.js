@@ -1,3 +1,21 @@
+
+/*!
+* ** *********************************************
+*
+* script.js
+* It contains the logic required for interacting
+* with the greenhouse control system, including 
+* sending and receiving data to/from the server 
+* and updating the users interface dynamically.
+*
+* Autores:  De los Cobos Garca Carlos Alberto
+*           Sánchez Hernández Marco Antonio
+*           Torres Bravo Cecilia
+* License:  MIT
+*
+* ** *********************************************
+*/
+
 function controlRiego() {
     fetch('/control-irrigacion', {
         method: 'POST',

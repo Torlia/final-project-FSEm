@@ -1,3 +1,17 @@
+/*!
+* ** *********************************************
+* style.css
+* It defines the styling and layout for the
+* greenhouse control system's user interface.
+*
+* Autores:  De los Cobos Garca Carlos Alberto
+*           Sánchez Hernández Marco Antonio
+*           Torres Bravo Cecilia
+* License:  MIT
+*
+* ** *********************************************
+*/
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;

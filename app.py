@@ -1,3 +1,19 @@
+
+# ## ###############################################
+#
+# app.py
+# It starts the Flask based webserver for the 
+# greenhouse control system. It also handles the 
+# users requests,sensors data, and the dynamic 
+# graphs data.
+#
+# Autores:  De los Cobos Garca Carlos Alberto
+#           Sánchez Hernández Marco Antonio
+#           Torres Bravo Cecilia
+# License:  MIT
+#
+# ## ###############################################
+
 from flask import Flask, send_from_directory, render_template, request, jsonify
 import threading
 import time
@@ -8,89 +24,150 @@ import struct
 
 from time import sleep
 
+# I2C configuration
 i2c = smbus2.SMBus(1)
 SLAVE_ADDR = 0x0A
 
 app = Flask(__name__)
 
+# Temperature variables
 temperatura = 0.0
 temp_min = 18.0
 temp_max = 20.0
+
+# Irrigation control variables
 frecuencia = 2
 duracion = 3
 
-# PID
+# PID variables
 proportional_constant = 20
 integral_constant = 0.008
 differential_constant = 10
-
 integral = 0
 previous_error = 0
 
+"""Principal route for greenhouse control webserver"""
 @app.route("/")
 def dashboard():
+    # Renders dashboard.html as the principal page
     return render_template("dashboard.html")
 
+"""Route for graphs additional page in webserver"""
 @app.route("/graph")
 def graph():
+    # Renders graph.html with dynamic graphs
     return render_template("graph.html")
 
+"""Function to verify and automatically adjust the temperature
+to the defined limits"""
 def verificar_temperatura():
+    # Calls required global variables
     global temperatura, temp_min, temp_max
     global error, temperatura, temp_min, integral, previous_error
     global proportional_constant, integral_constant, differential_constant
 
+    # As long as the application is running it will follow the
+    # designed conditionals
     while True:
+        # In case the temperature is below the designed minimum
+        # It will turn on the radiator
         if temperatura < temp_min:
+            # Calculates the error por PID
             error = temp_min - temperatura
             integral += error
             differential = error - previous_error
-        
+
+            # Calculates the output for PID
             proportional_output = proportional_constant * error
             integral_output = integral_constant * integral
             differential_output = differential_constant * differential
-        
+
             total_output = proportional_output + integral_output + differential_output
         
             previous_error = error
 
             print(total_output)
 
+            # Packages and sends the command in binary to the Pi Pico
+            # to turn on the radiator
             data = struct.pack("<bf", 7, total_output)
             msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
             i2c.i2c_rdwr(msg)
+
+            # Sleeps for 1 second, allowing the information to be sent and recieved
             sleep(1)
             print("Temperatura actual:", temperatura,"°C. Radiador encendido.")
-            #control_radiador()
+
+            # Registers the taken action in the history file for the dynamic graphs
             hora_actual = datetime.now().strftime('%D %H:%M:%S')
             historico = leer_datos()
             historico["acciones"].append({"hora": hora_actual, "tipo": "radiador"})
             escribir_datos(historico)
+
+        # In case the temperature is over the designed maximum
+        # It will turn on the second fan
         elif temperatura > temp_max:
+            # Packages and sends the command in binary to the Pi Pico
+            # to turn on the second fan
             data = struct.pack("<bf", 5, 0.00)
             msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
             i2c.i2c_rdwr(msg)
+
+            # Sleeps for 1 second, allowing the information to be sent and recieved
             sleep(1)
             print("Temperatura actual:", temperatura,"°C. Ventilador 2 encendido.")
+
+            # Registers the taken action in the history file for the dynamic graphs
             hora_actual = datetime.now().strftime('%D %H:%M:%S')
             historico = leer_datos()
             historico["acciones"].append({"hora": hora_actual, "tipo": "ventilador"})
             escribir_datos(historico)
+
+        # In case the temperature is between the designed minimum and maximum
         else:
             print("Temperatura actual:", temperatura, "°C. Dispositivos apagados.")
+
+            # Packages and sends the command in binary to the Pi Pico
+            # to turn off the device
             data = struct.pack("<bf", 6, 0.00)
             msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
             i2c.i2c_rdwr(msg)
+
+            # Sleeps for 1 second, allowing the information to be sent and recieved
             sleep(1)
+
+            # Registers the taken action in the history file for the dynamic graphs
+            hora_actual = datetime.now().strftime('%D %H:%M:%S')
+            historico = leer_datos()
+            historico["acciones"].append({"hora": hora_actual, "tipo": "ventilador"}) ## UPDATE DEVICE
+            escribir_datos(historico)
+
+            # Packages and sends the command in binary to the Pi Pico
+            # to turn off the device
             data = struct.pack("<bf", 8, 0.00)
             msg = smbus2.i2c_msg.write(SLAVE_ADDR, data)
             i2c.i2c_rdwr(msg)
+
+            # Sleeps for 1 second, allowing the information to be sent and recieved
             sleep(1)
 
+            # Registers the taken action in the history file for the dynamic graphs
+            hora_actual = datetime.now().strftime('%D %H:%M:%S')
+            historico = leer_datos()
+            historico["acciones"].append({"hora": hora_actual, "tipo": "ventilador"}) ## UPDATE DEVICE
+            escribir_datos(historico)
+
+"""Function to read temperature from sensors and
+obtain the mean"""
 def obtener_temperatura():
+    # Call required global variables
     global temperatura
+    
+    # As long as the application is running,
+    # it will obtain the temperature
     while True:
         try:
+            # Opens and read files where the sensors stores the information
             with open('/sys/bus/w1/devices/28-3ce1d444ecd1/temperature', 'r') as file:
                 content = file.read().replace('\n', ' ')
                 temp1 = float(content)/1000
@@ -98,6 +175,7 @@ def obtener_temperatura():
                 content = file.read().replace('\n', ' ')
                 temp2 = float(content)/1000
 
+            # Obtains the mean
             temperatura = (temp1+temp2)/2
         except Exception as e:
             print(f"Error al obtener la temperatura: {e}")
